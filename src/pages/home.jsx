@@ -1,7 +1,5 @@
-// import { Calendar } from "@nextui-org/react";
-// import FullCalendar from "@fullcalendar/react";
 import { CalendarComponent } from "../components/Calender";
-import { TransferForm } from "../components/Form";
+// import TransferForm from "../components/Form";
 import { Card, CardBody } from "@nextui-org/react";
 import { useState } from "react";
 
@@ -9,8 +7,15 @@ function Home() {
   // eslint-disable-next-line no-unused-vars
   const [calendarData, setCalendarData] = useState([
     {
-      title: "Meeting",
+      title: "transfer",
       start: "2024-12-15T11:15:30.762Z",
+      fromAddress: "",
+      toAddress: "",
+      amount: "",
+    },
+    {
+      title: "transfer",
+      start: "2024-12-15T15:15:30.762Z",
       fromAddress: "",
       toAddress: "",
       amount: "",
@@ -25,7 +30,7 @@ function Home() {
             <CalendarComponent data={calendarData} />
           </CardBody>
         </Card>
-        <TransferForm />
+        {/* <TransferForm /> */}
       </div>
     </>
   );
