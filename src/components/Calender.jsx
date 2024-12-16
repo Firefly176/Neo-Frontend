@@ -1,12 +1,28 @@
+import { useState } from "react";
 import FullCalendar from "@fullcalendar/react";
+import interactionPlugin from "@fullcalendar/interaction";
 import dayGridPlugin from "@fullcalendar/daygrid";
+import TransferForm from "./Form";
+import { Modal, ModalContent, useDisclosure } from "@nextui-org/react";
 
-// eslint-disable-next-line react/prop-types
 export function CalendarComponent({ data }) {
+  const { isOpen, onOpen, onOpenChange } = useDisclosure();
+  const [eventData, setEventData] = useState(null);
+
+  const handleDateClick = (info) => {
+    setEventData(info);
+    onOpen(true);
+  };
+
+  const handleEventClick = (info) => {
+    setEventData(info);
+    onOpen(true);
+  };
+
   return (
     <div>
       <FullCalendar
-        plugins={[dayGridPlugin]}
+        plugins={[dayGridPlugin, interactionPlugin]}
         initialView="dayGridMonth"
         weekends={true}
         events={data}
@@ -19,10 +35,21 @@ export function CalendarComponent({ data }) {
           list: "list",
         }}
         height={600}
-        eventClick={() => {
-          alert("hello");
-        }}
+        eventClick={handleEventClick}
+        selectable={true}
+        dateClick={handleDateClick}
       />
+      {isOpen && (
+        <Modal
+          isOpen={isOpen}
+          placement="top-center"
+          onOpenChange={onOpenChange}
+        >
+          <ModalContent size={"xs"}>
+            <TransferForm eventData={eventData} />
+          </ModalContent>
+        </Modal>
+      )}
     </div>
   );
 }
@@ -30,6 +57,7 @@ export function CalendarComponent({ data }) {
 function renderEventContent(eventInfo) {
   return (
     <>
+      {/* {console.log(eventInfo)} */}
       <b>{eventInfo.timeText}</b>
       <i>{eventInfo.event.title}</i>
     </>
