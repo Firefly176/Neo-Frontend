@@ -1,16 +1,18 @@
 /* eslint-disable react/prop-types */
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Form, Input, Button, TimeInput } from "@nextui-org/react";
 import { Time } from "@internationalized/date";
 
 const TransferForm = ({ eventData }) => {
   const [senderAddress, setSenderAddress] = useState(
-    eventData?.event?.fromAddress || "",
+    eventData?.event?.extendedProps?.fromAddress || "",
   );
   const [receiverAddress, setReceiverAddress] = useState(
-    eventData?.event?.toAddress || "",
+    eventData?.event?.extendedProps?.toAddress || "",
   );
-  const [amount, setAmount] = useState(eventData?.event?.amount || "");
+  const [amount, setAmount] = useState(
+    eventData?.event?.extendedProps?.amount || "",
+  );
   const [scheduleTime, setScheduleTime] = useState(
     new Time(
       new Date(eventData?.event?.start).getHours(),
