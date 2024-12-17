@@ -27,6 +27,11 @@ export function CalendarComponent({ data }) {
         weekends={true}
         events={data}
         eventContent={renderEventContent}
+        headerToolbar={{
+          left: "prev,next",
+          center: "title",
+          right: "dayGridMonth,dayGridWeek,dayGridDay",
+        }}
         buttonText={{
           today: "Today",
           month: "month",
