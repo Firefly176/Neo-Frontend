@@ -9,16 +9,16 @@ function Home() {
     {
       title: "transfer",
       start: "2024-12-15T11:15:30.762Z",
-      fromAddress: "",
-      toAddress: "",
-      amount: "",
+      fromAddress: "asdasdasd",
+      toAddress: "312312412",
+      amount: "20",
     },
     {
       title: "transfer",
       start: "2024-12-15T15:15:30.762Z",
-      fromAddress: "",
-      toAddress: "",
-      amount: "",
+      fromAddress: "21412412",
+      toAddress: "23232",
+      amount: "230",
     },
   ]);
 
