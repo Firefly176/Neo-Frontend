@@ -3,11 +3,16 @@ import {
   NavbarBrand,
   NavbarContent,
   NavbarItem,
-  Link,
   Button,
+  Dropdown,
+  DropdownTrigger,
+  DropdownMenu,
+  DropdownItem,
 } from "@nextui-org/react";
-import { useState } from "react";
 import Web3 from "web3";
+import { useDispatch, useSelector } from "react-redux";
+import { setAccountAddress, disconnect } from "../../store/reducer.js";
+import { useEffect } from "react";
 
 export const AcmeLogo = () => {
   return (
@@ -23,7 +28,8 @@ export const AcmeLogo = () => {
 };
 
 const NavbarComponent = () => {
-  const [account, setAccount] = useState(null);
+  const dispatch = useDispatch();
+  const account = useSelector((state) => state.metamask.accountAddress);
 
   const connectWallet = async () => {
     if (window.ethereum && window.ethereum.isMetaMask) {
@@ -31,14 +37,18 @@ const NavbarComponent = () => {
         const web3Instance = new Web3(window.ethereum);
         await window.ethereum.request({ method: "eth_requestAccounts" });
         const accounts = await web3Instance.eth.getAccounts();
-        setAccount(accounts[0]);
-        console.log("Connected account:", accounts[0]);
+        dispatch(setAccountAddress(accounts[0]));
       } catch (error) {
         console.error("Error connecting to MetaMask:", error);
       }
     } else {
       console.error("MetaMask is not installed");
     }
+  };
+
+  const disconnectWallet = () => {
+    dispatch(disconnect());
+    window.location.reload();
   };
 
   return (
@@ -49,14 +59,36 @@ const NavbarComponent = () => {
       </NavbarBrand>
       <NavbarContent justify="end">
         <NavbarItem>
-          <Button
-            color="primary"
-            href="#"
-            variant="flat"
-            onPress={connectWallet}
-          >
-            Connect Wallet
-          </Button>
+          {account ? (
+            <Dropdown>
+              <DropdownTrigger>
+                <Button variant="bordered">
+                  Connected: {account.slice(0, 6)}...{account.slice(-4)}
+                </Button>
+              </DropdownTrigger>
+              <DropdownMenu>
+                <DropdownItem
+                  key="delete"
+                  className="text-danger"
+                  color="danger"
+                  onClickCapture={disconnectWallet}
+                >
+                  Disconnect
+                </DropdownItem>
+              </DropdownMenu>
+            </Dropdown>
+          ) : (
+            <Button
+              color="primary"
+              href="#"
+              variant="flat"
+              onPress={connectWallet}
+            >
+              {account
+                ? `Connected: ${account.slice(0, 6)}...${account.slice(-4)}`
+                : "Connect Wallet"}
+            </Button>
+          )}
         </NavbarItem>
       </NavbarContent>
     </Navbar>
