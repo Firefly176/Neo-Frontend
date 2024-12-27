@@ -68,11 +68,24 @@ export function CalendarComponent({ data }) {
 }
 
 function renderEventContent(eventInfo) {
+  const { title, start, fromAddress, toAddress, amount, message, status } =
+    eventInfo.event.extendedProps;
+
   return (
-    <>
-      {/* {console.log(eventInfo)} */}
-      <b>{eventInfo.timeText}</b>
-      <i>{eventInfo.event.title}</i>
-    </>
+    <div className="w-full p-2 border-2 border-gray-200 rounded-md">
+      <div>
+        <b>{title}</b>
+      </div>
+      <div>{eventInfo.event.start.toLocaleTimeString()}</div>
+      <div>
+        <b>To:</b> {toAddress}
+      </div>
+      <div>
+        <b>Amount:</b> {amount}
+      </div>
+      <div>
+        <b>Status:</b> {status}
+      </div>
+    </div>
   );
 }
