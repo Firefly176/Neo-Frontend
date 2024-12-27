@@ -5,7 +5,6 @@ import dayGridPlugin from "@fullcalendar/daygrid";
 import TransferForm from "./Form";
 import { Modal, ModalContent, useDisclosure } from "@nextui-org/react";
 
-// eslint-disable-next-line react/prop-types
 export function CalendarComponent({ data }) {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const [eventData, setEventData] = useState(null);
@@ -14,10 +13,11 @@ export function CalendarComponent({ data }) {
     const selectedDate = new Date(info.dateStr);
     const currentDate = new Date();
 
-    if (selectedDate < currentDate) {
-      alert("Please select a future date.");
+    // Compare only the date part
+    if (selectedDate.setHours(0, 0, 0, 0) < currentDate.setHours(0, 0, 0, 0)) {
       return;
     }
+
     setEventData(info);
     onOpen(true);
   };
@@ -25,6 +25,12 @@ export function CalendarComponent({ data }) {
   const handleEventClick = (info) => {
     setEventData(info);
     onOpen(true);
+  };
+
+  const handleAllowSelect = (selectInfo) => {
+    const selectedDate = new Date(selectInfo.startStr);
+    const currentDate = new Date();
+    return selectedDate > currentDate;
   };
 
   return (
@@ -51,6 +57,7 @@ export function CalendarComponent({ data }) {
         eventClick={handleEventClick}
         selectable={true}
         dateClick={handleDateClick}
+        selectAllow={handleAllowSelect}
       />
       {isOpen && (
         <Modal
@@ -68,11 +75,11 @@ export function CalendarComponent({ data }) {
 }
 
 function renderEventContent(eventInfo) {
-  const { title, start, fromAddress, toAddress, amount, message, status } =
+  const { title, fromAddress, toAddress, amount, message, status } =
     eventInfo.event.extendedProps;
 
   return (
-    <div className="w-full p-2 border-2 border-gray-200 rounded-md">
+    <div className="event-content w-full p-2 border-2 border-gray-200 rounded-md">
       <div>
         <b>{title}</b>
       </div>
