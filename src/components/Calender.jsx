@@ -5,11 +5,19 @@ import dayGridPlugin from "@fullcalendar/daygrid";
 import TransferForm from "./Form";
 import { Modal, ModalContent, useDisclosure } from "@nextui-org/react";
 
+// eslint-disable-next-line react/prop-types
 export function CalendarComponent({ data }) {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const [eventData, setEventData] = useState(null);
 
   const handleDateClick = (info) => {
+    const selectedDate = new Date(info.dateStr);
+    const currentDate = new Date();
+
+    if (selectedDate < currentDate) {
+      alert("Please select a future date.");
+      return;
+    }
     setEventData(info);
     onOpen(true);
   };
