@@ -12,6 +12,8 @@ function Home() {
       fromAddress: "asdasdasd",
       toAddress: "312312412",
       amount: "20",
+      message: "test",
+      status: "Completed",
     },
     {
       title: "transfer",
@@ -19,6 +21,8 @@ function Home() {
       fromAddress: "21412412",
       toAddress: "23232",
       amount: "230",
+      message: "test",
+      status: "Completed",
     },
   ]);
 
