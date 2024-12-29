@@ -6,7 +6,12 @@ import TransferForm from "./Form";
 import { Modal, ModalContent, useDisclosure } from "@nextui-org/react";
 
 export function CalendarComponent({ data }) {
-  const { isOpen, onOpen, onOpenChange } = useDisclosure();
+  const {
+    isOpen: isFormModalOpen,
+    onOpen: onOpenFormModal,
+    onOpenChange: onOpenChangeFormModal,
+  } = useDisclosure();
+
   const [eventData, setEventData] = useState(null);
 
   const handleDateClick = (info) => {
@@ -19,12 +24,12 @@ export function CalendarComponent({ data }) {
     }
 
     setEventData(info);
-    onOpen(true);
+    onOpenFormModal(true);
   };
 
   const handleEventClick = (info) => {
     setEventData(info);
-    onOpen(true);
+    onOpenFormModal(true);
   };
 
   const handleAllowSelect = (selectInfo) => {
@@ -59,11 +64,11 @@ export function CalendarComponent({ data }) {
         dateClick={handleDateClick}
         selectAllow={handleAllowSelect}
       />
-      {isOpen && (
+      {isFormModalOpen && (
         <Modal
-          isOpen={isOpen}
+          isOpen={isFormModalOpen}
           placement="top-center"
-          onOpenChange={onOpenChange}
+          onOpenChange={onOpenChangeFormModal}
         >
           <ModalContent size={"xs"}>
             <TransferForm eventData={eventData} />
