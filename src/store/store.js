@@ -1,8 +1,8 @@
 import { configureStore } from "@reduxjs/toolkit";
-import metamaskSlice from "./reducer";
+import authSlice from "./reducer";
 
 export default configureStore({
   reducer: {
-    metamask: metamaskSlice,
+    auth: authSlice,
   },
 });
