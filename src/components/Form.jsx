@@ -5,7 +5,7 @@ import { Time } from "@internationalized/date";
 import { post } from "../utils/api_helper";
 import { CircularProgress } from "@nextui-org/progress";
 
-const TransferForm = ({ eventData, onCloseFormModal }) => {
+const TransferForm = ({ eventData, onCloseFormModal, transactionFetch }) => {
   const { toAddress, amount, message, status } =
     eventData?.event?.extendedProps || {};
 
@@ -23,6 +23,7 @@ const TransferForm = ({ eventData, onCloseFormModal }) => {
     ),
   );
 
+  // eslint-disable-next-line no-unused-vars
   const [action, setAction] = useState(null);
 
   const handleSubmit = async (e) => {
@@ -46,6 +47,7 @@ const TransferForm = ({ eventData, onCloseFormModal }) => {
       setAction(`submit ${JSON.stringify(data)}`);
       setLoading(false);
       onCloseFormModal();
+      transactionFetch();
       //toast
     } catch (error) {
       console.error("Error submitting the form:", error);
