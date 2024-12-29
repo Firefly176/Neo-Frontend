@@ -18,7 +18,8 @@ export function CalendarComponent() {
   } = useDisclosure();
 
   const [eventData, setEventData] = useState(null);
-  const [allEventData, setAllEventData] = useState(null);
+  const [allEventData, setAllEventData] = useState([]);
+  const [viewRange, setViewRange] = useState({ start: null, end: null });
 
   const handleDateClick = (info) => {
     const selectedDate = new Date(info.dateStr);
@@ -44,30 +45,40 @@ export function CalendarComponent() {
     return selectedDate > currentDate;
   };
 
+  const handleDatesSet = (dateInfo) => {
+    setViewRange({ start: dateInfo.startStr, end: dateInfo.endStr });
+  };
+
   useEffect(() => {
     async function transactionFetch() {
-      try {
-        const response = await get("/web3/transaction");
-        if (response.length !== 0) {
-          setAllEventData(
-            response.map((transaction) => ({
-              title: "transfer",
-              start: transaction.scheduledDate,
-              fromAddress: userDetails?.walletAddress,
-              recipientAddress: transaction.recipientAddress,
-              amount: transaction.amount,
-              message: transaction.message,
-              status: transaction.status,
-            })),
+      if (viewRange.start && viewRange.end && userDetails) {
+        try {
+          const response = await get(
+            `/web3/transaction?start=${new Date(
+              viewRange.start,
+            ).toISOString()}&end=${new Date(viewRange.end).toISOString()}`,
           );
+          if (response.length !== 0) {
+            setAllEventData(
+              response.map((transaction) => ({
+                title: "transfer",
+                start: transaction.scheduledDate,
+                fromAddress: userDetails.walletAddress,
+                recipientAddress: transaction.recipientAddress,
+                amount: transaction.amount,
+                message: transaction.message,
+                status: transaction.status,
+              })),
+            );
+          }
+        } catch (error) {
+          console.error("Error fetching transactions:", error);
         }
-      } catch (error) {
-        console.error("Error fetching transactions:", error);
       }
     }
 
     transactionFetch();
-  }, [userDetails]);
+  }, [viewRange, userDetails]);
 
   return (
     <div>
@@ -94,6 +105,7 @@ export function CalendarComponent() {
         selectable={true}
         dateClick={handleDateClick}
         selectAllow={handleAllowSelect}
+        datesSet={handleDatesSet}
       />
       {isFormModalOpen && (
         <Modal
@@ -123,9 +135,6 @@ function renderEventContent(eventInfo) {
         <b>{title}</b>
       </div>
       <div>{eventInfo.event.start.toLocaleTimeString()}</div>
-      <div>
-        <b>To:</b> {recipientAddress}
-      </div>{" "}
       <div>
         <b>Amount:</b> {amount}
       </div>
