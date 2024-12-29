@@ -11,7 +11,7 @@ import {
 } from "@nextui-org/react";
 import Web3 from "web3";
 import { useDispatch, useSelector } from "react-redux";
-import { setAccountAddress, setToken, disconnect } from "../../store/reducer.js";
+import { setUserToken, disconnect } from "../../store/reducer.js";
 import { post } from "../../utils/api_helper.js";
 import { useNavigate } from "react-router-dom";
 
@@ -22,8 +22,8 @@ export const AcmeLogo = () => {
 const NavbarComponent = () => {
   const dispatch = useDispatch();
   const Navigate = useNavigate();
-  const account = useSelector((state) => state.auth?.accountAddress);
-  const token = useSelector((state) => state.auth?.token);
+  const userDetails = useSelector((state) => state.auth?.userDetails);
+  const token = useSelector((state) => state.auth?.userToken);
 
   const connectWallet = async () => {
     if (window.ethereum && window.ethereum.isMetaMask) {
@@ -38,17 +38,24 @@ const NavbarComponent = () => {
         const message = `Sign this message to authenticate: ${Date.now()}`;
 
         // Request signature from user
-        const signature = await web3Instance.eth.personal.sign(message, address, '');
+        const signature = await web3Instance.eth.personal.sign(
+          message,
+          address,
+          "",
+        );
 
         // Send the signature, message, and address to the backend for verification
-        const response = await post("/api/v1/auth/web3", { signature, message, address });
-        console.log(response);
+        const response = await post("/auth/web3", {
+          signature,
+          message,
+          address,
+        });
 
         if (response.token) {
-          dispatch(setAccountAddress(address));
-          dispatch(setToken(response.token));
+          dispatch(setUserToken(response.token));
           // Store the token in localStorage for persistence
-          localStorage.setItem('token', response.token);
+          localStorage.setItem("auth_token", response.token);
+          Navigate("/home");
         } else {
           console.error("Authentication failed");
         }
@@ -62,8 +69,7 @@ const NavbarComponent = () => {
 
   const disconnectWallet = () => {
     dispatch(disconnect());
-    // Remove the token from localStorage
-    localStorage.removeItem('token');
+    localStorage.removeItem("auth_token");
     Navigate("/");
   };
 
@@ -75,11 +81,12 @@ const NavbarComponent = () => {
       </NavbarBrand>
       <NavbarContent justify="end">
         <NavbarItem>
-          {account && token ? (
+          {userDetails && token ? (
             <Dropdown>
               <DropdownTrigger>
                 <Button variant="bordered">
-                  Connected: {account.slice(0, 6)}...{account.slice(-4)}
+                  Connected: {userDetails.walletAddress.slice(0, 6)}...
+                  {userDetails.walletAddress.slice(-4)}
                 </Button>
               </DropdownTrigger>
               <DropdownMenu>
@@ -87,7 +94,7 @@ const NavbarComponent = () => {
                   key="delete"
                   className="text-danger"
                   color="danger"
-                  onClickCapture={disconnectWallet}
+                  onPress={disconnectWallet}
                 >
                   Disconnect
                 </DropdownItem>
