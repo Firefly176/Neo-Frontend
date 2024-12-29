@@ -12,7 +12,8 @@ import {
 import Web3 from "web3";
 import { useDispatch, useSelector } from "react-redux";
 import { setAccountAddress, disconnect } from "../../store/reducer.js";
-import { useEffect } from "react";
+import { post } from "../../utils/api_helper.js";
+import { useNavigate } from "react-router-dom";
 
 export const AcmeLogo = () => {
   return (
@@ -29,6 +30,7 @@ export const AcmeLogo = () => {
 
 const NavbarComponent = () => {
   const dispatch = useDispatch();
+  const Navigate = useNavigate();
   const account = useSelector((state) => state.metamask.accountAddress);
 
   const connectWallet = async () => {
@@ -36,7 +38,10 @@ const NavbarComponent = () => {
       try {
         const web3Instance = new Web3(window.ethereum);
         await window.ethereum.request({ method: "eth_requestAccounts" });
+
         const accounts = await web3Instance.eth.getAccounts();
+        await post("/api/v1/auth/web3/", { address: accounts[0] });
+
         dispatch(setAccountAddress(accounts[0]));
       } catch (error) {
         console.error("Error connecting to MetaMask:", error);
@@ -48,7 +53,7 @@ const NavbarComponent = () => {
 
   const disconnectWallet = () => {
     dispatch(disconnect());
-    window.location.reload();
+    Navigate("/");
   };
 
   return (
