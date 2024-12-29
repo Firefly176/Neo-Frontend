@@ -6,6 +6,7 @@ import Home from "./pages/Home";
 import Landing from "./pages/Landing";
 import Footer from "./components/Footer/Footer";
 import NavbarComponent from "./components/Navbar/Navbar";
+import ProtectedRoute from "./components/ProtectedRoute/ProtectedRoute";
 
 function App() {
   const router = createBrowserRouter([
@@ -21,13 +22,7 @@ function App() {
     },
     {
       path: "/home",
-      element: (
-        <>
-          <NavbarComponent />
-          <Home />
-          <Footer />
-        </>
-      ),
+      element: <ProtectedRoute element={<Home />} />,
     },
   ]);
 
