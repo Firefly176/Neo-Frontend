@@ -1,11 +1,15 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import FullCalendar from "@fullcalendar/react";
 import interactionPlugin from "@fullcalendar/interaction";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import TransferForm from "./Form";
 import { Modal, ModalContent, useDisclosure } from "@nextui-org/react";
+import { get } from "../utils/api_helper";
+import { useSelector } from "react-redux";
 
-export function CalendarComponent({ data }) {
+export function CalendarComponent() {
+  const userDetails = useSelector((state) => state.auth?.userDetails);
+
   const {
     isOpen: isFormModalOpen,
     onOpen: onOpenFormModal,
@@ -14,6 +18,7 @@ export function CalendarComponent({ data }) {
   } = useDisclosure();
 
   const [eventData, setEventData] = useState(null);
+  const [allEventData, setAllEventData] = useState(null);
 
   const handleDateClick = (info) => {
     const selectedDate = new Date(info.dateStr);
@@ -25,12 +30,12 @@ export function CalendarComponent({ data }) {
     }
 
     setEventData(info);
-    onOpenFormModal(true);
+    onOpenFormModal();
   };
 
   const handleEventClick = (info) => {
     setEventData(info);
-    onOpenFormModal(true);
+    onOpenFormModal();
   };
 
   const handleAllowSelect = (selectInfo) => {
@@ -39,13 +44,38 @@ export function CalendarComponent({ data }) {
     return selectedDate > currentDate;
   };
 
+  useEffect(() => {
+    async function transactionFetch() {
+      try {
+        const response = await get("/web3/transaction");
+        if (response.length !== 0) {
+          setAllEventData(
+            response.map((transaction) => ({
+              title: "transfer",
+              start: transaction.scheduledDate,
+              fromAddress: userDetails?.walletAddress,
+              recipientAddress: transaction.recipientAddress,
+              amount: transaction.amount,
+              message: transaction.message,
+              status: transaction.status,
+            })),
+          );
+        }
+      } catch (error) {
+        console.error("Error fetching transactions:", error);
+      }
+    }
+
+    transactionFetch();
+  }, [userDetails]);
+
   return (
     <div>
       <FullCalendar
         plugins={[dayGridPlugin, interactionPlugin]}
         initialView="dayGridMonth"
         weekends={true}
-        events={data}
+        events={allEventData}
         eventContent={renderEventContent}
         headerToolbar={{
           left: "prev,next",
@@ -72,7 +102,10 @@ export function CalendarComponent({ data }) {
           onOpenChange={onOpenChangeFormModal}
         >
           <ModalContent size={"xs"}>
-            <TransferForm eventData={eventData} onCloseFormModal={onCloseFormModal}/>
+            <TransferForm
+              eventData={eventData}
+              onCloseFormModal={onCloseFormModal}
+            />
           </ModalContent>
         </Modal>
       )}
@@ -81,7 +114,7 @@ export function CalendarComponent({ data }) {
 }
 
 function renderEventContent(eventInfo) {
-  const { title, fromAddress, toAddress, amount, message, status } =
+  const { title, fromAddress, recipientAddress, amount, message, status } =
     eventInfo.event.extendedProps;
 
   return (
@@ -91,8 +124,8 @@ function renderEventContent(eventInfo) {
       </div>
       <div>{eventInfo.event.start.toLocaleTimeString()}</div>
       <div>
-        <b>To:</b> {toAddress}
-      </div>
+        <b>To:</b> {recipientAddress}
+      </div>{" "}
       <div>
         <b>Amount:</b> {amount}
       </div>
