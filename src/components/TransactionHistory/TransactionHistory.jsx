@@ -7,42 +7,11 @@ import {
   TableCell,
   getKeyValue,
 } from "@nextui-org/react";
+import { get } from "../../utils/api_helper";
+import { useEffect, useState } from "react";
 
 const TransactionHistory = () => {
-  const rows = [
-    {
-      id: "1",
-      recipientAddress: "123 Main St",
-      message: "Payment for services",
-      amount: 150.75,
-      scheduledDate: "2024-01-01T12:00:00Z",
-      status: "Completed",
-    },
-    {
-      id: "2",
-      recipientAddress: "456 Elm St",
-      message: "Refund",
-      amount: 75.5,
-      scheduledDate: "2024-01-05T12:00:00Z",
-      status: "Pending",
-    },
-    {
-      id: "3",
-      recipientAddress: "789 Oak St",
-      message: "Gift",
-      amount: 200.0,
-      scheduledDate: "2024-01-10T12:00:00Z",
-      status: "Scheduled",
-    },
-    {
-      id: "4",
-      recipientAddress: "321 Pine St",
-      message: "Invoice payment",
-      amount: 300.25,
-      scheduledDate: "2024-01-15T12:00:00Z",
-      status: "Cancelled",
-    },
-  ];
+  const [rows, setRows] = useState([]);
 
   const columns = [
     {
@@ -66,7 +35,28 @@ const TransactionHistory = () => {
       label: "STATUS",
     },
   ];
-
+  useEffect(() => {
+    async function fetchTransactionHistory() {
+      try {
+        const response = await get(`/web3/transaction/history`);
+        if (response.length !== 0) {
+          setRows(
+            response.map((transaction) => ({
+              id: transaction.id,
+              recipientAddress: transaction.recipientAddress,
+              message: transaction.message,
+              amount: transaction.amount,
+              scheduledDate: transaction.scheduledDate,
+              status: transaction.status,
+            })),
+          );
+        }
+      } catch (error) {
+        console.error("Error fetching transactions:", error);
+      }
+    }
+    fetchTransactionHistory();
+  }, []);
   return (
     <>
       <Table
