@@ -1,9 +1,23 @@
 import { CalendarComponent } from "../components/Calender";
 // import TransferForm from "../components/Form";
-import { Card, CardBody } from "@nextui-org/react";
+import TransactionHistory from "../components/TransactionHistory/TransactionHistory";
+import {
+  Card,
+  CardBody,
+  Button,
+  Modal,
+  ModalContent,
+  useDisclosure,
+} from "@nextui-org/react";
 import { useState } from "react";
 
 function Home() {
+  const {
+    isOpen: isHistoryOpen,
+    onOpen: onHistoryOpen,
+    onOpenChange: onHistoryOpenChange,
+  } = useDisclosure();
+
   // eslint-disable-next-line no-unused-vars
   const [calendarData, setCalendarData] = useState([
     {
@@ -26,6 +40,10 @@ function Home() {
     },
   ]);
 
+  const handleModalOpen = () => {
+    onHistoryOpen();
+  };
+
   return (
     <>
       <div className="m-auto mt-5 w-[1440px]">
@@ -34,7 +52,21 @@ function Home() {
             <CalendarComponent data={calendarData} />
           </CardBody>
         </Card>
-        {/* <TransferForm /> */}
+        <Button className="mt-5 h-[50px] w-[200px]" onPress={handleModalOpen}>
+          Transaction History
+        </Button>
+        {isHistoryOpen && (
+          <Modal
+            isOpen={isHistoryOpen}
+            onOpenChange={onHistoryOpenChange}
+            placement="top-center"
+            size="5xl"
+          >
+            <ModalContent>
+              <TransactionHistory />
+            </ModalContent>
+          </Modal>
+        )}
       </div>
     </>
   );
