@@ -9,6 +9,7 @@ export function CalendarComponent({ data }) {
   const {
     isOpen: isFormModalOpen,
     onOpen: onOpenFormModal,
+    onClose: onCloseFormModal,
     onOpenChange: onOpenChangeFormModal,
   } = useDisclosure();
 
@@ -71,7 +72,7 @@ export function CalendarComponent({ data }) {
           onOpenChange={onOpenChangeFormModal}
         >
           <ModalContent size={"xs"}>
-            <TransferForm eventData={eventData} />
+            <TransferForm eventData={eventData} onCloseFormModal={onCloseFormModal}/>
           </ModalContent>
         </Modal>
       )}
