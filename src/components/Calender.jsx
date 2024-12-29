@@ -49,34 +49,34 @@ export function CalendarComponent() {
     setViewRange({ start: dateInfo.startStr, end: dateInfo.endStr });
   };
 
-  useEffect(() => {
-    async function transactionFetch() {
-      if (viewRange.start && viewRange.end && userDetails) {
-        try {
-          const response = await get(
-            `/web3/transaction?start=${new Date(
-              viewRange.start,
-            ).toISOString()}&end=${new Date(viewRange.end).toISOString()}`,
+  async function transactionFetch() {
+    if (viewRange.start && viewRange.end && userDetails) {
+      try {
+        const response = await get(
+          `/web3/transaction?start=${new Date(
+            viewRange.start,
+          ).toISOString()}&end=${new Date(viewRange.end).toISOString()}`,
+        );
+        if (response.length !== 0) {
+          setAllEventData(
+            response.map((transaction) => ({
+              title: "transfer",
+              start: transaction.scheduledDate,
+              fromAddress: userDetails.walletAddress,
+              recipientAddress: transaction.recipientAddress,
+              amount: transaction.amount,
+              message: transaction.message,
+              status: transaction.status,
+            })),
           );
-          if (response.length !== 0) {
-            setAllEventData(
-              response.map((transaction) => ({
-                title: "transfer",
-                start: transaction.scheduledDate,
-                fromAddress: userDetails.walletAddress,
-                recipientAddress: transaction.recipientAddress,
-                amount: transaction.amount,
-                message: transaction.message,
-                status: transaction.status,
-              })),
-            );
-          }
-        } catch (error) {
-          console.error("Error fetching transactions:", error);
         }
+      } catch (error) {
+        console.error("Error fetching transactions:", error);
       }
     }
+  }
 
+  useEffect(() => {
     transactionFetch();
   }, [viewRange, userDetails]);
 
@@ -117,6 +117,7 @@ export function CalendarComponent() {
             <TransferForm
               eventData={eventData}
               onCloseFormModal={onCloseFormModal}
+              transactionFetch={transactionFetch}
             />
           </ModalContent>
         </Modal>
@@ -126,6 +127,7 @@ export function CalendarComponent() {
 }
 
 function renderEventContent(eventInfo) {
+  // eslint-disable-next-line no-unused-vars
   const { title, fromAddress, recipientAddress, amount, message, status } =
     eventInfo.event.extendedProps;
 
