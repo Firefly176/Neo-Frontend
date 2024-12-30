@@ -14,6 +14,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { disconnect } from "../../store/reducer.js";
 import { post, get } from "../../utils/api_helper.js";
 import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 
 export const AcmeLogo = () => {
   // ... (AcmeLogo component remains unchanged)
@@ -23,11 +24,13 @@ const NavbarComponent = () => {
   const dispatch = useDispatch();
   const Navigate = useNavigate();
   const userDetails = useSelector((state) => state.auth?.userDetails);
+  const [loading, setLoading] = useState(false);
   // const token = useSelector((state) => state.auth?.userToken);
 
   const connectWallet = async () => {
     if (window.ethereum && window.ethereum.isMetaMask) {
       try {
+        setLoading(true);
         const web3Instance = new Web3(window.ethereum);
         await window.ethereum.request({ method: "eth_requestAccounts" });
 
@@ -57,19 +60,24 @@ const NavbarComponent = () => {
           // localStorage.setItem("auth_token", response.token);
           Navigate("/home");
         } else {
+          setLoading(false);
           console.error("Authentication failed");
         }
       } catch (error) {
+        setLoading(false);
         console.error("Error connecting to MetaMask:", error);
       }
     } else {
+      setLoading(false);
       console.error("MetaMask is not installed");
     }
   };
 
   const disconnectWallet = async () => {
+    setLoading(true);
     await get("/auth/logout");
     dispatch(disconnect());
+    setLoading(false);
     Navigate("/");
   };
 
@@ -84,7 +92,11 @@ const NavbarComponent = () => {
           {userDetails ? (
             <Dropdown>
               <DropdownTrigger>
-                <Button variant="bordered">
+                <Button
+                  variant="bordered"
+                  isLoading={loading}
+                  isDisabled={loading}
+                >
                   Connected: {userDetails.walletAddress.slice(0, 6)}...
                   {userDetails.walletAddress.slice(-4)}
                 </Button>
@@ -106,6 +118,8 @@ const NavbarComponent = () => {
               href="#"
               variant="flat"
               onPress={connectWallet}
+              isLoading={loading}
+              isDisabled={loading}
             >
               Connect Wallet
             </Button>
