@@ -11,7 +11,7 @@ import {
 } from "@nextui-org/react";
 import Web3 from "web3";
 import { useDispatch, useSelector } from "react-redux";
-import { setUserToken, disconnect } from "../../store/reducer.js";
+import { disconnect } from "../../store/reducer.js";
 import { post } from "../../utils/api_helper.js";
 import { useNavigate } from "react-router-dom";
 
@@ -23,7 +23,7 @@ const NavbarComponent = () => {
   const dispatch = useDispatch();
   const Navigate = useNavigate();
   const userDetails = useSelector((state) => state.auth?.userDetails);
-  const token = useSelector((state) => state.auth?.userToken);
+  // const token = useSelector((state) => state.auth?.userToken);
 
   const connectWallet = async () => {
     if (window.ethereum && window.ethereum.isMetaMask) {
@@ -69,7 +69,7 @@ const NavbarComponent = () => {
 
   const disconnectWallet = () => {
     dispatch(disconnect());
-    localStorage.removeItem("auth_token");
+    // localStorage.removeItem("auth_token");
     Navigate("/");
   };
 
@@ -81,7 +81,7 @@ const NavbarComponent = () => {
       </NavbarBrand>
       <NavbarContent justify="end">
         <NavbarItem>
-          {userDetails && token ? (
+          {userDetails ? (
             <Dropdown>
               <DropdownTrigger>
                 <Button variant="bordered">
