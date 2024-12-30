@@ -14,24 +14,19 @@ const ProtectedRoute = ({ element }) => {
   const dispatch = useDispatch();
   const user = useSelector((state) => state.auth.userDetails);
 
-  useEffect(() => {
-    if (!user) {
-      //   toast.error("Please login to proceed!");
-      navigate("/landing");
-    }
-  }, [user, navigate]);
-
-  useEffect(() => {
-    if (user) {
-      navigate("/home");
-    }
-  }, [user]);
+  // useEffect(() => {
+  //   if (!user) {
+  //     //   toast.error("Please login to proceed!");
+  //     navigate("/landing");
+  //   }
+  // }, [user]);
 
   useEffect(() => {
     const fetchProfile = async () => {
       try {
         const response = await get("/auth/profile");
         dispatch(setUserDetails(response));
+        navigate("/home");
       } catch (error) {
         console.error("Error fetching profile", error);
         localStorage.clear();

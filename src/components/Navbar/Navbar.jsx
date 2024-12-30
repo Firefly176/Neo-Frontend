@@ -12,7 +12,7 @@ import {
 import Web3 from "web3";
 import { useDispatch, useSelector } from "react-redux";
 import { disconnect } from "../../store/reducer.js";
-import { post } from "../../utils/api_helper.js";
+import { post, get } from "../../utils/api_helper.js";
 import { useNavigate } from "react-router-dom";
 
 export const AcmeLogo = () => {
@@ -67,9 +67,9 @@ const NavbarComponent = () => {
     }
   };
 
-  const disconnectWallet = () => {
+  const disconnectWallet = async () => {
+    await get("/auth/logout");
     dispatch(disconnect());
-    // localStorage.removeItem("auth_token");
     Navigate("/");
   };
 
