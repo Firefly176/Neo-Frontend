@@ -11,9 +11,12 @@ import {
 } from "@nextui-org/react";
 import Web3 from "web3";
 import { useDispatch, useSelector } from "react-redux";
+// import { Calendar } from "lucide-react";
+import EventAvailableIcon from "@mui/icons-material/EventAvailable";
 import { disconnect } from "../../store/reducer.js";
 import { post, get } from "../../utils/api_helper.js";
 import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 
 export const AcmeLogo = () => {
   // ... (AcmeLogo component remains unchanged)
@@ -23,11 +26,13 @@ const NavbarComponent = () => {
   const dispatch = useDispatch();
   const Navigate = useNavigate();
   const userDetails = useSelector((state) => state.auth?.userDetails);
+  const [loading, setLoading] = useState(false);
   // const token = useSelector((state) => state.auth?.userToken);
 
   const connectWallet = async () => {
     if (window.ethereum && window.ethereum.isMetaMask) {
       try {
+        setLoading(true);
         const web3Instance = new Web3(window.ethereum);
         await window.ethereum.request({ method: "eth_requestAccounts" });
 
@@ -57,26 +62,35 @@ const NavbarComponent = () => {
           // localStorage.setItem("auth_token", response.token);
           Navigate("/home");
         } else {
+          setLoading(false);
           console.error("Authentication failed");
         }
       } catch (error) {
+        setLoading(false);
         console.error("Error connecting to MetaMask:", error);
       }
     } else {
+      setLoading(false);
       console.error("MetaMask is not installed");
     }
   };
 
   const disconnectWallet = async () => {
+    setLoading(true);
     await get("/auth/logout");
     dispatch(disconnect());
+    setLoading(false);
     Navigate("/");
   };
 
   return (
-    <Navbar isBordered={true} maxWidth="2xl">
+    <Navbar
+      isBordered={true}
+      maxWidth="full"
+      className="py-4 px-6 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50 w-full border-b border-border/40"
+    >
       <NavbarBrand>
-        <AcmeLogo />
+        <EventAvailableIcon className="mr-2" />
         <p className="font-bold text-inherit">Crypto Scheduler</p>
       </NavbarBrand>
       <NavbarContent justify="end">
@@ -84,7 +98,11 @@ const NavbarComponent = () => {
           {userDetails ? (
             <Dropdown>
               <DropdownTrigger>
-                <Button variant="bordered">
+                <Button
+                  variant="bordered"
+                  isLoading={loading}
+                  isDisabled={loading}
+                >
                   Connected: {userDetails.walletAddress.slice(0, 6)}...
                   {userDetails.walletAddress.slice(-4)}
                 </Button>
@@ -106,6 +124,8 @@ const NavbarComponent = () => {
               href="#"
               variant="flat"
               onPress={connectWallet}
+              isLoading={loading}
+              isDisabled={loading}
             >
               Connect Wallet
             </Button>
