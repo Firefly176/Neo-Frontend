@@ -4,6 +4,7 @@ const API_URL = import.meta.env.VITE_API_URL;
 const createAxiosInstance = () => {
   const axiosApi = axios.create({
     baseURL: API_URL,
+    withCredentials: true,
   });
 
   axiosApi.interceptors.response.use(
@@ -21,7 +22,7 @@ export async function get(url, config = {}) {
     .get(url, {
       ...config,
       headers: {
-        Authorization: `Bearer ${localStorage.getItem("auth_token")}`,
+        // Authorization: `Bearer ${localStorage.getItem("auth_token")}`,
       },
     })
     .then((response) => response.data);
