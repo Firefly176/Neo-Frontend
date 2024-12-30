@@ -51,10 +51,10 @@ const NavbarComponent = () => {
           address,
         });
 
-        if (response.token) {
-          dispatch(setUserToken(response.token));
+        if (response.status === 200) {
+          // dispatch(setUserToken(response.token));
           // Store the token in localStorage for persistence
-          localStorage.setItem("auth_token", response.token);
+          // localStorage.setItem("auth_token", response.token);
           Navigate("/home");
         } else {
           console.error("Authentication failed");
