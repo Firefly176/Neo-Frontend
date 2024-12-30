@@ -9,17 +9,17 @@ import Navbar from "../Navbar/Navbar";
 import Footer from "../Footer/Footer";
 // eslint-disable-next-line react/prop-types
 const ProtectedRoute = ({ element }) => {
-  const userToken = useSelector((state) => state.auth.userToken);
+  // const userToken = useSelector((state) => state.auth.userToken);
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const user = useSelector((state) => state.auth.userDetails);
 
   useEffect(() => {
-    if (!userToken) {
+    if (!user) {
       //   toast.error("Please login to proceed!");
       navigate("/landing");
     }
-  }, [userToken, navigate]);
+  }, [user, navigate]);
 
   useEffect(() => {
     if (user) {
