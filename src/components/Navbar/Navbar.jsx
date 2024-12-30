@@ -51,7 +51,7 @@ const NavbarComponent = () => {
           address,
         });
 
-        if (response.status === 200) {
+        if (response.status) {
           // dispatch(setUserToken(response.token));
           // Store the token in localStorage for persistence
           // localStorage.setItem("auth_token", response.token);
