@@ -11,6 +11,8 @@ import {
 } from "@nextui-org/react";
 import Web3 from "web3";
 import { useDispatch, useSelector } from "react-redux";
+// import { Calendar } from "lucide-react";
+import EventAvailableIcon from "@mui/icons-material/EventAvailable";
 import { disconnect } from "../../store/reducer.js";
 import { post, get } from "../../utils/api_helper.js";
 import { useNavigate } from "react-router-dom";
@@ -82,9 +84,13 @@ const NavbarComponent = () => {
   };
 
   return (
-    <Navbar isBordered={true} maxWidth="2xl">
+    <Navbar
+      isBordered={true}
+      maxWidth="full"
+      className="py-4 px-6 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50 w-full border-b border-border/40"
+    >
       <NavbarBrand>
-        <AcmeLogo />
+        <EventAvailableIcon className="mr-2" />
         <p className="font-bold text-inherit">Crypto Scheduler</p>
       </NavbarBrand>
       <NavbarContent justify="end">
