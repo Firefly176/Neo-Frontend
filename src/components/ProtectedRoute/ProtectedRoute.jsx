@@ -1,16 +1,18 @@
 // ProtectedRoute.js
 import { useEffect } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { disconnect, setUserDetails } from "../../store/reducer";
 import { get } from "../../utils/api_helper";
 // import { toast } from "react-toastify";
 import Navbar from "../Navbar/Navbar";
 import Footer from "../Footer/Footer";
+import Loader from "../Loader/Loader";
 // eslint-disable-next-line react/prop-types
 const ProtectedRoute = ({ element }) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const userDetails = useSelector((state) => state.auth?.userDetails);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -20,7 +22,6 @@ const ProtectedRoute = ({ element }) => {
         navigate("/home");
       } catch (error) {
         console.error("Error fetching profile", error);
-        localStorage.clear();
         dispatch(disconnect());
         navigate("/landing");
       }
@@ -31,7 +32,7 @@ const ProtectedRoute = ({ element }) => {
   return (
     <>
       <Navbar />
-      {element}
+      {userDetails ? element : <Loader />}
       <Footer />
     </>
   );
