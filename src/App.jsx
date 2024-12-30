@@ -7,9 +7,14 @@ import Landing from "./pages/Landing.jsx";
 import Footer from "./components/Footer/Footer.jsx";
 import NavbarComponent from "./components/Navbar/Navbar.jsx";
 import ProtectedRoute from "./components/ProtectedRoute/ProtectedRoute.jsx";
+import { Navigate } from "react-router-dom";
 
 function App() {
   const router = createBrowserRouter([
+    {
+      path: "/",
+      element: <Navigate to="/landing" replace />,
+    },
     {
       path: "/landing",
       element: (
