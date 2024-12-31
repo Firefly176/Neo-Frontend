@@ -27,9 +27,8 @@ Welcome to the Neo-Frontend repository, the user interface for our decentralized
     - Block Explorer: https://xt4scan.ngd.network/
     - Currency Symbol: GAS
 ## Authors (A-Z)
-
-- [Chirag Tamhane](https://github.com/Chirag175)
 - [Aniket Gupta](https://github.com/Firefly176)
+- [Chirag Tamhane](https://github.com/Chirag175)
 
 ## Future Plans
 - [ ]  Multi-token Support: Expand beyond the current ERC20 token to support multiple cryptocurrencies.
