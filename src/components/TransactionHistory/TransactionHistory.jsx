@@ -9,9 +9,11 @@ import {
 } from "@nextui-org/react";
 import { get } from "../../utils/api_helper";
 import { useEffect, useState } from "react";
+import Loader from "../Loader/Loader";
 
 const TransactionHistory = () => {
   const [rows, setRows] = useState([]);
+  const [isLoading, setLoading] = useState(false);
 
   const columns = [
     {
@@ -38,6 +40,7 @@ const TransactionHistory = () => {
   useEffect(() => {
     async function fetchTransactionHistory() {
       try {
+        setLoading(true);
         const response = await get(`/web3/transaction/history`);
         if (response.length !== 0) {
           setRows(
@@ -50,8 +53,10 @@ const TransactionHistory = () => {
               status: transaction.status,
             })),
           );
+          setLoading(false);
         }
       } catch (error) {
+        setLoading(false);
         console.error("Error fetching transactions:", error);
       }
     }
@@ -79,7 +84,7 @@ const TransactionHistory = () => {
             <TableColumn key={column.key}>{column.label}</TableColumn>
           )}
         </TableHeader>
-        <TableBody items={rows}>
+        <TableBody items={rows} isLoading={isLoading} loader={<Loader />}>
           {(item) => (
             <TableRow key={item.id}>
               {(columnKey) => (
