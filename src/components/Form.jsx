@@ -1,18 +1,15 @@
-/* eslint-disable react/prop-types */
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Form, Input, Button, TimeInput } from "@nextui-org/react";
 import { Time } from "@internationalized/date";
-import { post } from "../utils/api_helper";
 import { CircularProgress } from "@nextui-org/progress";
+import Web3 from 'web3';
+import PaymentSchedulerJSON from '../contract/PaymentScheduler.json' with { type: 'json' };
+const PaymentSchedulerABI = PaymentSchedulerJSON.abi;
 
 const TransferForm = ({ eventData, onCloseFormModal, transactionFetch }) => {
-  const { toAddress, amount, message, status } =
-    eventData?.event?.extendedProps || {};
-
+  const { toAddress, amount, message, status } = eventData?.event?.extendedProps || {};
   const [loading, setLoading] = useState(false);
   const { dateStr } = eventData;
-
-  // const [senderAddress, setSenderAddress] = useState(fromAddress || "");
   const [receiverAddress, setReceiverAddress] = useState(toAddress || "");
   const [amountValue, setAmountValue] = useState(amount || "");
   const [messageValue, setMessageValue] = useState(message || "");
@@ -22,35 +19,79 @@ const TransferForm = ({ eventData, onCloseFormModal, transactionFetch }) => {
       new Date(eventData?.event?.start).getMinutes(),
     ),
   );
-
-  // eslint-disable-next-line no-unused-vars
+  const [web3, setWeb3] = useState(null);
+  const [contract, setContract] = useState(null);
   const [action, setAction] = useState(null);
+
+  useEffect(() => {
+    const initWeb3 = async () => {
+      if (window.ethereum) {
+        const web3Instance = new Web3(window.ethereum);
+        console.log(web3Instance);
+        setWeb3(web3Instance);
+        try {
+          await window.ethereum.request({ method: 'eth_requestAccounts' });
+          const networkId = await web3Instance.eth.net.getId();
+          console.log(networkId);
+          // Check if we're on Neo X Testnet
+          if (networkId === 12227332n) {
+            const contractInstance = new web3Instance.eth.Contract(
+              PaymentSchedulerABI,
+              '0xA0365F92dD3e0e4A700B2446023DECD062D64A41'
+            );
+            setContract(contractInstance);
+          } else {
+            console.error('Please connect to Neo X Testnet');
+          }
+        } catch (error) {
+          console.error("User denied account access or error occurred:", error);
+        }
+      } else {
+        console.log('Please install MetaMask!');
+      }
+    };    
+    initWeb3();
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    let data = Object.fromEntries(new FormData(e.currentTarget));
+    const formData = new FormData(e.currentTarget);
+    const data = Object.fromEntries(formData);
 
-    // Extract date from dateStr
     const date = new Date(dateStr);
-
-    // Set hours and minutes from scheduleTime
     date.setHours(scheduleTime.hour);
     date.setMinutes(scheduleTime.minute);
+    const scheduledTime = Math.floor(date.getTime() / 1000);
 
-    // Format the date to ISO string or any other desired format
     data.scheduledDate = date.toISOString();
-
+      
     try {
+      const accounts = await web3.eth.getAccounts();
+      const amountInWei = web3.utils.toWei(data.amount, 'ether');
+      const fee = await contract.methods.calculateDynamicFee(amountInWei).call();
+      const totalValue = web3.utils.toBigInt(amountInWei) + (web3.utils.toBigInt(fee));
+
+      const result = await contract.methods.scheduleTransaction(
+        data.recipientAddress,
+        amountInWei,
+        scheduledTime
+      ).send({
+        from: accounts[0],
+        value: totalValue.toString()
+      });
+
       const response = await post("/web3/transaction", data);
       console.log("Success:", response);
       setAction(`submit ${JSON.stringify(data)}`);
       setLoading(false);
+
+      console.log("Transaction scheduled:", result);
       onCloseFormModal();
       transactionFetch();
-      //toast
     } catch (error) {
-      console.error("Error submitting the form:", error);
+      console.error("Error scheduling transaction:", error);
+    } finally {
       setLoading(false);
     }
   };
