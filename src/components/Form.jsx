@@ -1,9 +1,11 @@
+/* eslint-disable react/prop-types */
 import { useState, useEffect } from "react";
 import { Form, Input, Button, TimeInput } from "@nextui-org/react";
 import { Time } from "@internationalized/date";
 import { CircularProgress } from "@nextui-org/progress";
 import Web3 from 'web3';
 import PaymentSchedulerJSON from '../contract/PaymentScheduler.json' with { type: 'json' };
+import { post } from "../utils/api_helper";
 const PaymentSchedulerABI = PaymentSchedulerJSON.abi;
 
 const TransferForm = ({ eventData, onCloseFormModal, transactionFetch }) => {
@@ -14,30 +16,33 @@ const TransferForm = ({ eventData, onCloseFormModal, transactionFetch }) => {
   const [amountValue, setAmountValue] = useState(amount || "");
   const [messageValue, setMessageValue] = useState(message || "");
   const [scheduleTime, setScheduleTime] = useState(
-    new Time(
+    eventData?.event?.start ? new Time(
       new Date(eventData?.event?.start).getHours(),
       new Date(eventData?.event?.start).getMinutes(),
-    ),
+    ) : new Time(
+      new Date().getHours(),
+      new Date().getMinutes() + 5,
+    )
   );
   const [web3, setWeb3] = useState(null);
   const [contract, setContract] = useState(null);
+  // eslint-disable-next-line no-unused-vars
   const [action, setAction] = useState(null);
 
   useEffect(() => {
     const initWeb3 = async () => {
       if (window.ethereum) {
         const web3Instance = new Web3(window.ethereum);
-        console.log(web3Instance);
         setWeb3(web3Instance);
         try {
           await window.ethereum.request({ method: 'eth_requestAccounts' });
           const networkId = await web3Instance.eth.net.getId();
-          console.log(networkId);
+
           // Check if we're on Neo X Testnet
           if (networkId === 12227332n) {
             const contractInstance = new web3Instance.eth.Contract(
               PaymentSchedulerABI,
-              '0xA0365F92dD3e0e4A700B2446023DECD062D64A41'
+              import.meta.env.VITE_CONTRACT_ADDRESS,
             );
             setContract(contractInstance);
           } else {
@@ -81,15 +86,18 @@ const TransferForm = ({ eventData, onCloseFormModal, transactionFetch }) => {
         value: totalValue.toString()
       });
 
-      const response = await post("/web3/transaction", data);
-      console.log("Success:", response);
-      setAction(`submit ${JSON.stringify(data)}`);
-      setLoading(false);
-
-      console.log("Transaction scheduled:", result);
-      onCloseFormModal();
-      transactionFetch();
+      if(parseInt(result.status.toString())) {
+        await post("/web3/transaction", {...data, result: JSON.stringify(result, (_, v) => typeof v === 'bigint' ? v.toString() : v)});
+        setAction(`submit ${JSON.stringify(data)}`);
+        setLoading(false);
+        onCloseFormModal();
+        transactionFetch();
+      } else{
+        setLoading(false);
+        console.error("Transaction failed");
+      }
     } catch (error) {
+      setLoading(false);
       console.error("Error scheduling transaction:", error);
     } finally {
       setLoading(false);
@@ -104,7 +112,10 @@ const TransferForm = ({ eventData, onCloseFormModal, transactionFetch }) => {
           setReceiverAddress("");
           setAmountValue("");
           setMessageValue("");
-          setScheduleTime(new Time(0, 0));
+          setScheduleTime(new Time(
+            new Date().getHours(),
+            new Date().getMinutes() + 5,
+          ));
           setAction("reset");
         }}
         onSubmit={handleSubmit}
